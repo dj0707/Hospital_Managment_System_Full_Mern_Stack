@@ -1,153 +1,86 @@
-# MediCore HMS — Smart Hospital Management and Pharmacy Billing System
+# 🏥 MediCore HMS — Smart Hospital Management and Pharmacy Billing System
 
-> **Major Project Submission — 3rd-Year B.Tech Information Technology**  
-> GitHub Repository Target: [https://github.com/dj0707/Hospital_Managment_System_Full_Mern_Stack](https://github.com/dj0707/Hospital_Managment_System_Full_Mern_Stack)
-
----
-
-## 1. Project Abstract & Objectives
-
-**MediCore HMS** is a healthcare administration platform engineered using a **Java Full Stack architecture (Spring Boot 3 + React + TypeScript + MySQL)** complemented by modern MERN/JavaScript ecosystem tooling. The system delivers end-to-end hospital administration, clinical documentation (EHR), outpatient appointment scheduling, inpatient bed admissions, and a **high-precision Pharmacy Point-of-Sale (POS) counter with First-Expiry-First-Out (FEFO) batch inventory management**.
-
-### Core Objectives
-1. **Clean Database Architecture**: Relational schema with Flyway migrations compatible with **Aiven Cloud MySQL 8+**.
-2. **Deterministic Financial Math**: 100% server-authoritative financial and discount calculations using Java `BigDecimal` (preventing floating-point rounding errors).
-3. **Advanced Pharmacy POS & FEFO Dispensing**: Automated batch selection ensuring nearest-expiry batches are dispensed first, preventing expired medicine delivery.
-4. **Role-Based Security**: Spring Security 6 with stateless JWT authentication and granular role authorization (`ADMIN`, `DOCTOR`, `RECEPTIONIST`, `PHARMACIST`, `ACCOUNTANT`, `PATIENT`).
-5. **AI Operations Assistant**: Optional backend-integrated AI assistant for administrative questions, inventory advisory, and workflow guidance.
+> **College Major Project**  
+> GitHub Repository: **[https://github.com/dj0707/Hospital_Managment_System_Full_Mern_Stack](https://github.com/dj0707/Hospital_Managment_System_Full_Mern_Stack)**  
+> Architecture: **Spring Boot 3 (Java 21 LTS) + React TypeScript + Aiven MySQL 8 + Tailwind CSS**
 
 ---
 
-## 2. Architecture & Technology Justification
+## ⚡ 1-Click Run Everything (No copy-pasting commands!)
 
-```
-+-------------------------------------------------------------------------+
-|                         React 18 + TypeScript                           |
-|      (Tailwind CSS, Lucide Icons, React Router, Vite, Recharts)         |
-+------------------------------------+------------------------------------+
-                                     | REST (JSON / JWT)
-                                     v
-+------------------------------------+------------------------------------+
-|                      Spring Boot 3.3.4 (Java 21)                        |
-|  - Security & JWT Auth Filter     - Transactional Services (ACID)      |
-|  - Bean Validation & Exceptions   - Concurrency Locking & Auditing     |
-+------------------------------------+------------------------------------+
-                                     | JPA / Hibernate / Flyway
-                                     v
-+------------------------------------+------------------------------------+
-|                  Aiven Cloud MySQL 8.0 Relational DB                    |
-|  - 23 Normalized Tables           - FEFO Expiry & Stock Tracking        |
-+-------------------------------------------------------------------------+
-```
+In `C:\Users\admin\Downloads\medicore-hms`:
+👉 **Double-click `start-all.bat`**
 
-### Why Java Spring Boot for Backend & React/TypeScript for Frontend?
-- **Enterprise Robustness & Financial Integrity**: Java's strict typing, JPA transaction boundaries (`@Transactional`), and `BigDecimal` provide bulletproof accuracy for pharmaceutical billing and concurrency protection during simultaneous pharmacy checkouts.
-- **Fast Interactive POS UI**: React with TypeScript and Tailwind CSS delivers sub-100ms debounced medicine catalog searches and instant live previews for busy hospital pharmacy counters.
+This will automatically open and launch:
+1. **Spring Boot Backend**: `http://localhost:8080` (API & Swagger at `/swagger-ui.html`)
+2. **React Frontend**: `http://localhost:5173`
 
 ---
 
-## 3. Database ER & Key Entities (Mermaid Diagram)
+## 🔑 Login Credentials
 
-```mermaid
-erDiagram
-    USERS ||--o{ USER_ROLES : has
-    ROLES ||--o{ USER_ROLES : assigned
-    PATIENTS ||--o{ APPOINTMENTS : books
-    DOCTORS ||--o{ APPOINTMENTS : conducts
-    DEPARTMENTS ||--o{ DOCTORS : belongs_to
-    PATIENTS ||--o{ ENCOUNTERS : attends
-    DOCTORS ||--o{ ENCOUNTERS : records
-    ENCOUNTERS ||--o{ PRESCRIPTIONS : generates
-    PRESCRIPTIONS ||--o{ PRESCRIPTION_ITEMS : contains
-    MEDICINES ||--o{ PRESCRIPTION_ITEMS : prescribed
-    MEDICINE_CATEGORIES ||--o{ MEDICINES : categorizes
-    MEDICINES ||--o{ MEDICINE_BATCHES : stocked_in
-    SUPPLIERS ||--o{ MEDICINE_BATCHES : supplies
-    MEDICINE_BATCHES ||--o{ STOCK_MOVEMENTS : tracks
-    INVOICES ||--o{ INVOICE_ITEMS : includes
-    INVOICE_ITEMS ||--o{ INVOICE_BATCH_ALLOCATIONS : allocates
-    MEDICINE_BATCHES ||--o{ INVOICE_BATCH_ALLOCATIONS : fulfills
-    INVOICES ||--o{ PAYMENTS : receives
-    WARDS ||--o{ BEDS : contains
-    BEDS ||--o{ ADMISSIONS : occupies
-    PATIENTS ||--o{ ADMISSIONS : admits
+| Role | Username | Password |
+| :--- | :--- | :--- |
+| **System Administrator** | `admin` | `Admin@Medicore2026!` |
+
+---
+
+## 🚀 How to Push this to your GitHub Repository
+
+Run these exact commands in PowerShell or Terminal inside `C:\Users\admin\Downloads\medicore-hms`:
+
+```powershell
+# 1. Navigate to project
+cd C:\Users\admin\Downloads\medicore-hms
+
+# 2. Link your remote GitHub repo
+git remote add origin https://github.com/dj0707/Hospital_Managment_System_Full_Mern_Stack.git
+
+# 3. Rename branch to main and push
+git branch -M main
+git push -u origin main --force
 ```
 
 ---
 
-## 4. Pharmacy FEFO Quantity Model
+## 🌐 How to Deploy Frontend to Vercel (Step-by-Step)
 
-| Concept | Explanation |
-| :--- | :--- |
-| **Catalog Configuration** | Stored with `unitsPerStrip` (e.g., 10 tablets/strip). |
-| **Inventory Stock Ledger** | All physical stock is recorded and deducted at the **base unit level** (e.g., individual tablets/capsules). |
-| **POS Billing Screen** | Cashier enters quantity in **strips** (e.g., 3 strips). The backend computes: `3 * 10 = 30 base units`. |
-| **FEFO Allocation** | Batches are queried using `ORDER BY expiryDate ASC` with pessimistic row locking. The system deducts 30 units across the earliest valid batches. |
-| **Expired Stock Guard** | Batches where `expiryDate <= today` are automatically excluded from dispensing. |
-
----
-
-## 5. Getting Started & Setup Guide
-
-### Prerequisites
-- **Java 21 LTS** & **Maven 3.8+**
-- **Node.js 18+** & **npm**
-- **MySQL 8.0+** (Local or Aiven Cloud MySQL)
-
-### Step 1: Configure Environment Variables
-Copy `.env.example` to `.env` or set environment variables:
-```bash
-# Database credentials
-DB_HOST=localhost
-DB_PORT=3306
-DB_NAME=medicore_db
-DB_USERNAME=root
-DB_PASSWORD=root
-DB_USE_SSL=false
-
-# First Administrator Bootstrap
-ADMIN_BOOTSTRAP_ENABLED=true
-ADMIN_USERNAME=admin
-ADMIN_PASSWORD=Admin@Medicore2026!
-```
-
-### Step 2: Start Spring Boot Backend
-```bash
-cd backend
-mvn clean spring-boot:run
-```
-- Backend starts at: `http://localhost:8080`
-- Swagger API Docs: `http://localhost:8080/swagger-ui.html`
-- Automatic Flyway migrations run on startup, creating the schema and bootstrapping the administrator account.
-
-### Step 3: Start React Frontend
-```bash
-cd frontend
-npm install
-npm run dev
-```
-- Frontend application starts at: `http://localhost:5173`
+1. Go to **[vercel.com](https://vercel.com)** and log in with your GitHub account.
+2. Click **"Add New..."** ➔ **"Project"**.
+3. Select your repository: `dj0707/Hospital_Managment_System_Full_Mern_Stack`.
+4. Configure the project settings:
+   - **Root Directory**: Select `frontend` (or click *Edit* and choose `frontend`).
+   - **Framework Preset**: `Vite`
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+5. **Environment Variables**:
+   - Add `VITE_API_BASE_URL` = `https://your-backend-url.com/api/v1` (or your cloud deployed backend).
+6. Click **Deploy**!
+   - *A `vercel.json` file is already included inside `frontend/` so all page routes (`/dashboard`, `/pharmacy/pos`, etc.) will work without 404 errors.*
 
 ---
 
-## 6. Docker Deployment
+## ☁️ How to Deploy Backend (Render / Railway / Aiven)
 
-To launch the complete system (Backend + Frontend + MySQL) using Docker:
-```bash
-docker-compose up --build -d
-```
-- Frontend: `http://localhost:3000`
-- Backend API: `http://localhost:8080`
+1. **Database**: Create a free MySQL instance on **[Aiven.io](https://aiven.io)** or **Railway**.
+2. **Backend**:
+   - Link repository on **Render** or **Railway**.
+   - Set **Root Directory**: `backend`
+   - Add Environment Variables:
+     - `SPRING_DATASOURCE_URL` = `jdbc:mysql://<aiven-host>:<port>/<dbname>?sslMode=PREFERRED`
+     - `SPRING_DATASOURCE_USERNAME` = `<username>`
+     - `SPRING_DATASOURCE_PASSWORD` = `<password>`
+     - `JWT_SECRET` = `404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970`
+     - `ADMIN_BOOTSTRAP_ENABLED` = `true`
 
 ---
 
-## 7. Viva & Major Project Defense Q&A
+## 📦 What is Included in this Project
 
-1. **How is concurrency handled during simultaneous pharmacy checkouts?**  
-   *Answer*: The backend queries available batches using `@Lock(LockModeType.PESSIMISTIC_WRITE)` within a `@Transactional` boundary, preventing race conditions or negative inventory stock.
-
-2. **Why use Flyway instead of Hibernate's `ddl-auto: update`?**  
-   *Answer*: Flyway provides version-controlled, reproducible SQL migration scripts (`V1__Initial_Schema.sql`), ensuring strict schema governance and preventing accidental column alterations in cloud databases.
-
-3. **How does the AI module handle patient privacy?**  
-   *Answer*: The AI assistant operates strictly on non-identifiable administrative concepts and aggregate operational metrics. No private patient demographic or clinical records are sent to external LLMs.
+- **Pharmacy POS (Top Priority)**: Real-time debounced medicine search, strip/pack quantity input, FEFO (First-Expiry-First-Out) batch stock deduction with pessimistic locking, and instant printable receipts.
+- **Patient Management (EHR)**: Patient profiles, demographics, blood group, emergency contacts, and history.
+- **Doctors & Staff**: Department allocation, consultation fees, and schedule tracking.
+- **Appointments**: Conflict-free booking with concurrency check.
+- **Inpatient Wards & Beds**: Ward types (General, ICU, Private), bed status, admission tracking, and discharge stay billing.
+- **Billing & Invoices**: Immutable line items, tax (GST), discounts, and partial/full payment tracking.
+- **AI Operations Assistant**: Advisory chatbot for hospital policies and inventory guidance.
