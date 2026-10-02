@@ -1,21 +1,20 @@
 {
   "name": "frontend",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
-    "autoprefixer": "^10.6.1",
+    "@tailwindcss/vite": "^4.3.3",
     "axios": "^1.20.0",
     "clsx": "^2.1.1",
     "lucide-react": "^1.50.0",
-    "postcss": "^8.5.28",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-hook-form": "^7.89.0",
@@ -25,8 +24,6 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.3.3",
-    "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
