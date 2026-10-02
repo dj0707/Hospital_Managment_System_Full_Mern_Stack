@@ -24,31 +24,31 @@ public class ClinicController {
 
     private final ClinicService clinicService;
 
-    // PATIENTS
+    // PATIENTS — Strictly restricted to ADMIN for full management, with search allowed for Pharmacy Billing
     @PostMapping("/patients")
-    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONIST', 'DOCTOR')")
-    @Operation(summary = "Register a new patient")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Register a new patient into EHR (Admin only)")
     public ResponseEntity<ClinicDtos.PatientDto> createPatient(@Valid @RequestBody ClinicDtos.PatientDto dto) {
         return ResponseEntity.ok(clinicService.createPatient(dto));
     }
 
     @PutMapping("/patients/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONIST', 'DOCTOR')")
-    @Operation(summary = "Update patient demographics")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Update patient demographics (Admin only)")
     public ResponseEntity<ClinicDtos.PatientDto> updatePatient(@PathVariable Long id, @Valid @RequestBody ClinicDtos.PatientDto dto) {
         return ResponseEntity.ok(clinicService.updatePatient(id, dto));
     }
 
     @GetMapping("/patients/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONIST', 'DOCTOR', 'PHARMACIST', 'ACCOUNTANT', 'PATIENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCTOR', 'PHARMACIST', 'PATIENT')")
     @Operation(summary = "Get patient by ID")
     public ResponseEntity<ClinicDtos.PatientDto> getPatientById(@PathVariable Long id) {
         return ResponseEntity.ok(clinicService.getPatientById(id));
     }
 
     @GetMapping("/patients/search")
-    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONIST', 'DOCTOR', 'PHARMACIST', 'ACCOUNTANT')")
-    @Operation(summary = "Search patients by name, code, or phone")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PHARMACIST', 'DOCTOR', 'RECEPTIONIST')")
+    @Operation(summary = "Search patients for EHR and Medicine Billing")
     public ResponseEntity<Page<ClinicDtos.PatientDto>> searchPatients(
             @RequestParam(required = false) String query,
             @RequestParam(defaultValue = "0") int page,
@@ -59,7 +59,7 @@ public class ClinicController {
     // DEPARTMENTS
     @PostMapping("/departments")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Create medical department")
+    @Operation(summary = "Create medical department (Admin only)")
     public ResponseEntity<ClinicDtos.DepartmentDto> createDepartment(@Valid @RequestBody ClinicDtos.DepartmentDto dto) {
         return ResponseEntity.ok(clinicService.createDepartment(dto));
     }
@@ -73,14 +73,14 @@ public class ClinicController {
     // DOCTORS
     @PostMapping("/doctors")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Register a new doctor")
+    @Operation(summary = "Register a new doctor (Admin only)")
     public ResponseEntity<ClinicDtos.DoctorDto> createDoctor(@Valid @RequestBody ClinicDtos.DoctorDto dto) {
         return ResponseEntity.ok(clinicService.createDoctor(dto));
     }
 
     @PutMapping("/doctors/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Update doctor details")
+    @Operation(summary = "Update doctor details (Admin only)")
     public ResponseEntity<ClinicDtos.DoctorDto> updateDoctor(@PathVariable Long id, @Valid @RequestBody ClinicDtos.DoctorDto dto) {
         return ResponseEntity.ok(clinicService.updateDoctor(id, dto));
     }
@@ -102,21 +102,21 @@ public class ClinicController {
 
     // APPOINTMENTS
     @PostMapping("/appointments")
-    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONIST', 'DOCTOR', 'PATIENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCTOR', 'RECEPTIONIST', 'PATIENT')")
     @Operation(summary = "Book an appointment")
     public ResponseEntity<ClinicDtos.AppointmentDto> bookAppointment(@Valid @RequestBody ClinicDtos.AppointmentDto dto) {
         return ResponseEntity.ok(clinicService.bookAppointment(dto));
     }
 
     @PatchMapping("/appointments/{id}/status")
-    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONIST', 'DOCTOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCTOR', 'RECEPTIONIST')")
     @Operation(summary = "Update appointment status")
     public ResponseEntity<ClinicDtos.AppointmentDto> updateAppointmentStatus(@PathVariable Long id, @RequestParam String status) {
         return ResponseEntity.ok(clinicService.updateAppointmentStatus(id, status));
     }
 
     @GetMapping("/appointments")
-    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONIST', 'DOCTOR', 'PATIENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCTOR', 'RECEPTIONIST', 'PATIENT')")
     @Operation(summary = "Filter appointments")
     public ResponseEntity<Page<ClinicDtos.AppointmentDto>> filterAppointments(
             @RequestParam(required = false) Long doctorId,
@@ -131,7 +131,7 @@ public class ClinicController {
     // ENCOUNTERS & MEDICAL RECORDS
     @PostMapping("/encounters")
     @PreAuthorize("hasAnyRole('ADMIN', 'DOCTOR')")
-    @Operation(summary = "Record clinical encounter and vitals")
+    @Operation(summary = "Record clinical encounter and vitals (Doctor / Admin)")
     public ResponseEntity<ClinicDtos.EncounterDto> createEncounter(@Valid @RequestBody ClinicDtos.EncounterDto dto) {
         return ResponseEntity.ok(clinicService.createEncounter(dto));
     }
@@ -146,7 +146,7 @@ public class ClinicController {
     // PRESCRIPTIONS
     @PostMapping("/prescriptions")
     @PreAuthorize("hasAnyRole('ADMIN', 'DOCTOR')")
-    @Operation(summary = "Issue medical prescription")
+    @Operation(summary = "Issue medical prescription (Doctor / Admin)")
     public ResponseEntity<ClinicDtos.PrescriptionDto> createPrescription(@Valid @RequestBody ClinicDtos.PrescriptionDto dto) {
         return ResponseEntity.ok(clinicService.createPrescription(dto));
     }

@@ -44,7 +44,7 @@ public class AdminBootstrapRunner implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        // Initialize Core Roles if not exist
+        // 1. Initialize Core Roles if not exist
         List<String> roleNames = Arrays.asList(
                 "ROLE_ADMIN",
                 "ROLE_DOCTOR",
@@ -65,26 +65,74 @@ public class AdminBootstrapRunner implements CommandLineRunner {
             }
         }
 
-        // Initialize First Admin if enabled and not exists
-        if (bootstrapEnabled && !userRepository.existsByUsername(adminUsername)) {
+        // 2. Initialize or Update Admin Account with fresh BCrypt hash
+        if (bootstrapEnabled) {
             Role adminRole = roleRepository.findByName("ROLE_ADMIN")
                     .orElseThrow(() -> new IllegalStateException("ROLE_ADMIN not found"));
 
-            Set<Role> roles = new HashSet<>();
-            roles.add(adminRole);
+            User admin = userRepository.findByUsername(adminUsername).orElse(null);
+            if (admin == null) {
+                Set<Role> roles = new HashSet<>();
+                roles.add(adminRole);
 
-            User admin = User.builder()
-                    .username(adminUsername)
-                    .email(adminEmail)
-                    .passwordHash(passwordEncoder.encode(adminPassword))
-                    .fullName(adminFullName)
-                    .phone("1800-MEDICORE")
-                    .isActive(true)
-                    .roles(roles)
-                    .build();
+                admin = User.builder()
+                        .username(adminUsername)
+                        .email(adminEmail)
+                        .passwordHash(passwordEncoder.encode(adminPassword))
+                        .fullName(adminFullName)
+                        .phone("1800-MEDICORE")
+                        .isActive(true)
+                        .roles(roles)
+                        .build();
+                userRepository.save(admin);
+                log.info("First Administrator created: {}", adminUsername);
+            } else {
+                // Ensure password matches bootstrap configuration
+                admin.setPasswordHash(passwordEncoder.encode(adminPassword));
+                admin.setIsActive(true);
+                userRepository.save(admin);
+                log.info("Administrator password synced: {}", adminUsername);
+            }
 
-            userRepository.save(admin);
-            log.info("First Administrator securely bootstrapped with username: {}", adminUsername);
+            // 3. Create Sample Doctor Account for Doctor Portal testing if not exists
+            if (!userRepository.existsByUsername("doctor")) {
+                Role docRole = roleRepository.findByName("ROLE_DOCTOR")
+                        .orElseThrow(() -> new IllegalStateException("ROLE_DOCTOR not found"));
+                Set<Role> docRoles = new HashSet<>();
+                docRoles.add(docRole);
+
+                User docUser = User.builder()
+                        .username("doctor")
+                        .email("doctor@medicore.com")
+                        .passwordHash(passwordEncoder.encode("Doctor@Medicore2026!"))
+                        .fullName("Dr. Aryan Sharma (Cardiologist)")
+                        .phone("9876543211")
+                        .isActive(true)
+                        .roles(docRoles)
+                        .build();
+                userRepository.save(docUser);
+                log.info("Sample Doctor account created: doctor / Doctor@Medicore2026!");
+            }
+
+            // 4. Create Sample Pharmacist Account for Pharmacy POS testing if not exists
+            if (!userRepository.existsByUsername("pharmacist")) {
+                Role pharmRole = roleRepository.findByName("ROLE_PHARMACIST")
+                        .orElseThrow(() -> new IllegalStateException("ROLE_PHARMACIST not found"));
+                Set<Role> pharmRoles = new HashSet<>();
+                pharmRoles.add(pharmRole);
+
+                User pharmUser = User.builder()
+                        .username("pharmacist")
+                        .email("pharmacy@medicore.com")
+                        .passwordHash(passwordEncoder.encode("Pharmacy@Medicore2026!"))
+                        .fullName("Pharmacist Rajesh Verma")
+                        .phone("9876543212")
+                        .isActive(true)
+                        .roles(pharmRoles)
+                        .build();
+                userRepository.save(pharmUser);
+                log.info("Sample Pharmacist account created: pharmacist / Pharmacy@Medicore2026!");
+            }
         }
     }
 }

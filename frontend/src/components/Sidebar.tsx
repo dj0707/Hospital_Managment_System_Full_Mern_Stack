@@ -12,42 +12,43 @@ import {
   BedDouble,
   Bot,
   Activity,
+  FileText,
 } from 'lucide-react';
 
 const Sidebar: React.FC = () => {
-  const { hasAnyRole } = useAuth();
+  const { hasAnyRole, hasRole } = useAuth();
 
   const navItems = [
     {
       to: '/dashboard',
       label: 'Dashboard',
       icon: LayoutDashboard,
-      roles: ['ROLE_ADMIN', 'ROLE_DOCTOR', 'ROLE_RECEPTIONIST', 'ROLE_PHARMACIST', 'ROLE_ACCOUNTANT'],
+      roles: ['ROLE_ADMIN'],
     },
     {
       to: '/patients',
-      label: 'Patients',
+      label: 'Patient Records (EHR)',
       icon: Users,
-      roles: ['ROLE_ADMIN', 'ROLE_RECEPTIONIST', 'ROLE_DOCTOR'],
+      roles: ['ROLE_ADMIN'], // Strictly Admin only for full management
     },
     {
       to: '/doctors',
-      label: 'Doctors',
+      label: 'Doctors & Staff',
       icon: UserCheck,
-      roles: ['ROLE_ADMIN', 'ROLE_RECEPTIONIST'],
+      roles: ['ROLE_ADMIN'],
     },
     {
       to: '/appointments',
       label: 'Appointments',
       icon: Calendar,
-      roles: ['ROLE_ADMIN', 'ROLE_RECEPTIONIST', 'ROLE_DOCTOR', 'ROLE_PATIENT'],
+      roles: ['ROLE_ADMIN', 'ROLE_DOCTOR', 'ROLE_RECEPTIONIST', 'ROLE_PATIENT'],
     },
     {
       to: '/pharmacy/pos',
-      label: 'Pharmacy POS',
+      label: 'Pharmacy POS Billing',
       icon: ShoppingCart,
       roles: ['ROLE_ADMIN', 'ROLE_PHARMACIST', 'ROLE_RECEPTIONIST'],
-      badge: 'Counter',
+      badge: 'Billing',
     },
     {
       to: '/pharmacy/medicines',
@@ -57,28 +58,28 @@ const Sidebar: React.FC = () => {
     },
     {
       to: '/invoices',
-      label: 'Invoices & Billing',
+      label: 'Invoices & Reports',
       icon: Receipt,
-      roles: ['ROLE_ADMIN', 'ROLE_PHARMACIST', 'ROLE_ACCOUNTANT', 'ROLE_RECEPTIONIST'],
+      roles: ['ROLE_ADMIN', 'ROLE_PHARMACIST', 'ROLE_ACCOUNTANT'],
     },
     {
       to: '/inpatient',
       label: 'Wards & Beds',
       icon: BedDouble,
-      roles: ['ROLE_ADMIN', 'ROLE_RECEPTIONIST', 'ROLE_DOCTOR'],
+      roles: ['ROLE_ADMIN', 'ROLE_DOCTOR'],
     },
     {
       to: '/ai-assistant',
       label: 'AI Operations',
       icon: Bot,
-      roles: ['ROLE_ADMIN', 'ROLE_DOCTOR', 'ROLE_PHARMACIST', 'ROLE_RECEPTIONIST'],
+      roles: ['ROLE_ADMIN', 'ROLE_DOCTOR', 'ROLE_PHARMACIST'],
       badge: 'AI',
     },
   ];
 
   return (
     <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col shrink-0 border-r border-slate-800">
-      <div className="h-16 flex items-center px-6 border-b border-slate-800 bg-slate-950/50">
+      <div className="h-16 flex items-center px-6 border-b border-slate-800 bg-slate-950/60">
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/30">
             <Activity className="w-5 h-5" />
@@ -99,7 +100,7 @@ const Sidebar: React.FC = () => {
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                `flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                `flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold transition-all ${
                   isActive
                     ? 'bg-blue-600 text-white shadow-sm'
                     : 'text-slate-400 hover:text-white hover:bg-slate-800'
@@ -111,7 +112,7 @@ const Sidebar: React.FC = () => {
                 <span>{item.label}</span>
               </div>
               {item.badge && (
-                <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300">
+                <span className="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300">
                   {item.badge}
                 </span>
               )}
@@ -120,8 +121,8 @@ const Sidebar: React.FC = () => {
         })}
       </div>
 
-      <div className="p-4 border-t border-slate-800 bg-slate-950/30 text-xs text-slate-500 text-center">
-        MediCore v1.0 • B.Tech Major Project
+      <div className="p-3 border-t border-slate-800 bg-slate-950/40 text-[11px] text-slate-500 text-center">
+        Role-Governed Access Control Active
       </div>
     </aside>
   );
