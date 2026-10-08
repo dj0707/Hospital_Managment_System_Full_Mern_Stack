@@ -6,6 +6,17 @@
 
 ---
 
+## 🔑 Login Credentials (Dedicated Role Portals)
+
+| Role Portal | Username | Password | Powers & Access |
+| :--- | :--- | :--- | :--- |
+| **Admin** | `admin` | `Admin@Medicore2026!` | Full Hospital Control, Patient EHR Records, Staff Management, Wards, Analytics |
+| **Doctor** | `doctor` | `Doctor@Medicore2026!` | Assigned Appointments, Clinical Encounters, Inpatient Care, Prescriptions |
+| **Pharmacist** | `pharmacist` | `Pharmacy@Medicore2026!` | Pharmacy POS Billing Counter, Stock Inwarding, Catalog, Invoice Printing |
+| **Patient** | *(Self-Registration)* | *(Your Password)* | Personal Appointments, Prescriptions & Medical History |
+
+---
+
 ## ⚡ 1-Click Run Everything (No copy-pasting commands!)
 
 In `C:\Users\admin\Downloads\medicore-hms`:
@@ -14,14 +25,6 @@ In `C:\Users\admin\Downloads\medicore-hms`:
 This will automatically open and launch:
 1. **Spring Boot Backend**: `http://localhost:8080` (API & Swagger at `/swagger-ui.html`)
 2. **React Frontend**: `http://localhost:5173`
-
----
-
-## 🔑 Login Credentials
-
-| Role | Username | Password |
-| :--- | :--- | :--- |
-| **System Administrator** | `admin` | `Admin@Medicore2026!` |
 
 ---
 
@@ -51,7 +54,7 @@ git push -u origin main --force
 4. Configure the project settings:
    - **Root Directory**: Select `frontend` (or click *Edit* and choose `frontend`).
    - **Framework Preset**: `Vite`
-   - **Build Command**: `npm run build`
+   - **Build Command**: `vite build`
    - **Output Directory**: `dist`
 5. **Environment Variables**:
    - Add `VITE_API_BASE_URL` = `https://your-backend-url.com/api/v1` (or your cloud deployed backend).
@@ -78,7 +81,7 @@ git push -u origin main --force
 ## 📦 What is Included in this Project
 
 - **Pharmacy POS (Top Priority)**: Real-time debounced medicine search, strip/pack quantity input, FEFO (First-Expiry-First-Out) batch stock deduction with pessimistic locking, and instant printable receipts.
-- **Patient Management (EHR)**: Patient profiles, demographics, blood group, emergency contacts, and history.
+- **Patient Management (EHR)**: Patient profiles, demographics, blood group, emergency contacts, and history strictly managed by Admin.
 - **Doctors & Staff**: Department allocation, consultation fees, and schedule tracking.
 - **Appointments**: Conflict-free booking with concurrency check.
 - **Inpatient Wards & Beds**: Ward types (General, ICU, Private), bed status, admission tracking, and discharge stay billing.
