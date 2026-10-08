@@ -115,7 +115,12 @@ const Login: React.FC = () => {
         navigate('/dashboard');
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid username or password. Check credentials.');
+      if (!err.response) {
+        const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
+        setError(`Backend Connection Failed: Unable to reach API at ${apiUrl}. Please ensure Spring Boot backend is running or VITE_API_BASE_URL is configured.`);
+      } else {
+        setError(err.response?.data?.message || 'Invalid username or password. Check credentials.');
+      }
     } finally {
       setLoading(false);
     }
@@ -157,7 +162,12 @@ const Login: React.FC = () => {
       setUsername(regUsername);
       setPassword('');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed. Username or email may already exist.');
+      if (!err.response) {
+        const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
+        setError(`Backend Connection Failed: Unable to reach API at ${apiUrl}. Please ensure Spring Boot backend is running.`);
+      } else {
+        setError(err.response?.data?.message || 'Registration failed. Username or email may already exist.');
+      }
     } finally {
       setLoading(false);
     }
