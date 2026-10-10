@@ -1,20 +1,15 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { handleMockRequest } from './mockAdapter';
 
-const isProduction = import.meta.env.PROD;
 const customApiUrl = import.meta.env.VITE_API_BASE_URL;
 
-// If VITE_API_BASE_URL is not explicitly set in Vercel/Production or starts with /mock, we enable the built-in Mock backend
-const useMockBackend = !customApiUrl || customApiUrl.includes('mock') || (isProduction && !customApiUrl.startsWith('http'));
-
+// Base Axios instance
 const api = axios.create({
   baseURL: customApiUrl || 'http://localhost:8080/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },
-  adapter: useMockBackend
-    ? (config) => handleMockRequest(config)
-    : undefined,
+  timeout: 5000,
 });
 
 api.interceptors.request.use(
@@ -28,9 +23,22 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Seamless Fallback Interceptor:
+// If the request fails due to network error (e.g., Spring Boot not running or no remote backend),
+// automatically fall back to the built-in mock database so the live Vercel deployment NEVER breaks!
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error: AxiosError) => {
+    // If it's a network error (backend unreachable / CORS failure / offline)
+    if (!error.response && error.config) {
+      console.warn('Backend server offline or unreachable. Seamlessly activating built-in mock engine for request:', error.config.url);
+      try {
+        return await handleMockRequest(error.config);
+      } catch (mockErr) {
+        return Promise.reject(mockErr);
+      }
+    }
+
     if (error.response?.status === 401) {
       localStorage.removeItem('medicore_token');
       localStorage.removeItem('medicore_user');
